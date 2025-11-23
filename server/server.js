@@ -4,13 +4,18 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+<<<<<<< Updated upstream
 const mongoose = require('mongoose'); // MongoDB
+=======
+const mongoose = require('mongoose');
+>>>>>>> Stashed changes
 const socketHandlers = require('./socket/socketHandlers');
 const authController = require('./controllers/authController');
 
 const app = express();
 const server = http.createServer(app);
 
+<<<<<<< Updated upstream
 // -------------------------
 // MongoDB Connection
 // -------------------------
@@ -28,6 +33,15 @@ mongoose.connection.on('error', (err) => {
   console.error('MongoDB connection error ❌', err);
 });
 // -------------------------
+=======
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
+>>>>>>> Stashed changes
 
 // Configure CORS
 app.use(cors({
