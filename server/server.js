@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
@@ -19,22 +18,25 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-// Configure CORS
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5174',
+// CORS configuration
+const allowedOrigins = [process.env.CLIENT_URL];
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
   credentials: true
-}));
+};
 
-// Parse JSON bodies
+app.use(cors(corsOptions));
 app.use(express.json());
 
-// Initialize Socket.io with CORS
+// Initialize Socket.io with the same CORS config
 const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5174',
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
+  cors: corsOptions
 });
 
 // Health check
@@ -42,7 +44,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Chat server is running!' });
 });
 
-// Authentication
+// Authentication routes
 app.post('/api/auth/register', authController.register);
 app.post('/api/auth/login', authController.login);
 app.get('/api/auth/verify', authController.verifyToken);
@@ -52,7 +54,6 @@ socketHandlers(io);
 
 // Start server
 const PORT = process.env.PORT || 5000;
-
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
