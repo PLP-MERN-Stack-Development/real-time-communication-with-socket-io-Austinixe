@@ -1,0 +1,114 @@
+.user-list-sidebar {
+  width: 280px;
+  background: white;
+  border-left: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.close-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.user-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.no-users {
+  text-align: center;
+  color: #999;
+  padding: 20px;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+.user-item:hover {
+  background: #f8f9fa;
+}
+
+.user-item-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 2px solid #667eea;
+}
+
+.user-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-item-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.you-badge {
+  color: #667eea;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+.user-status {
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (max-width: 768px) {
+  .user-list-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  }
+}
