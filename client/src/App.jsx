@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
 import Chat from './pages/Chat';
-import socket from './socket/socket';
+import { initializeSocket, getSocket, disconnectSocket } from './socket/socket';
 import './App.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -12,36 +12,44 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Connection event handlers
-    socket.on('connect', () => {
-      console.log('Connected to server');
-      setConnected(true);
-    });
+    // Get current socket instance
+    const socket = getSocket();
+    
+    // Only set up listeners if socket exists
+    if (socket) {
+      socket.on('connect', () => {
+        console.log('Connected to server');
+        setConnected(true);
+      });
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from server');
-      setConnected(false);
-    });
+      socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+        setConnected(false);
+      });
 
-    socket.on('registered', (data) => {
-      setUser(data.user);
-    });
+      socket.on('registered', (data) => {
+        setUser(data.user);
+      });
 
-    socket.on('connect_error', (error) => {
-      console.error('Connection error:', error.message);
-      if (error.message === 'Invalid token' || error.message === 'Authentication required') {
-        handleLogout();
-      }
-    });
+      socket.on('connect_error', (error) => {
+        console.error('Connection error:', error.message);
+        if (error.message === 'Invalid token' || error.message === 'Authentication required') {
+          handleLogout();
+        }
+      });
+    }
 
     // Cleanup
     return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.off('registered');
-      socket.off('connect_error');
+      const currentSocket = getSocket();
+      if (currentSocket) {
+        currentSocket.off('connect');
+        currentSocket.off('disconnect');
+        currentSocket.off('registered');
+        currentSocket.off('connect_error');
+      }
     };
-  }, []);
+  }, [user]); // Add user as dependency so listeners are set up after login
 
   // Check for saved token on mount
   useEffect(() => {
@@ -63,8 +71,8 @@ function App() {
           if (data.success) {
             setUser(data.user);
             
-            // Connect socket with token
-            socket.auth = { token };
+            // Initialize socket with token and connect
+            const socket = initializeSocket(token);
             socket.connect();
           } else {
             // Invalid token, clear storage
@@ -87,13 +95,13 @@ function App() {
   const handleLogin = (token, userData) => {
     setUser(userData);
     
-    // Connect socket with token
-    socket.auth = { token };
+    // Initialize socket with token and connect
+    const socket = initializeSocket(token);
     socket.connect();
   };
 
   const handleLogout = () => {
-    socket.disconnect();
+    disconnectSocket();
     setUser(null);
     setConnected(false);
     localStorage.removeItem('chatToken');

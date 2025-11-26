@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import socket from '../socket/socket';
+import { getSocket } from '../socket/socket';
 import MessageList from '../components/MessageList';
 import MessageInput from '../components/MessageInput';
 import UserList from '../components/UserList';
@@ -32,6 +32,11 @@ function Chat({ user, connected, onLogout }) {
 
   // Socket event listeners
   useEffect(() => {
+    const socket = getSocket();
+    
+    // Only set up listeners if socket exists
+    if (!socket) return;
+
     // Receive previous messages
     socket.on('previous-messages', (msgs) => {
       setMessages(msgs);
@@ -116,7 +121,10 @@ function Chat({ user, connected, onLogout }) {
 
   // Get rooms list on mount
   useEffect(() => {
-    socket.emit('get-rooms');
+    const socket = getSocket();
+    if (socket) {
+      socket.emit('get-rooms');
+    }
   }, []);
 
   // Reset unread count when window is focused
@@ -139,13 +147,19 @@ function Chat({ user, connected, onLogout }) {
   }, [unreadCount]);
 
   const handleSendMessage = (text) => {
-    socket.emit('send-message', {
-      text,
-      roomId: currentRoom
-    });
+    const socket = getSocket();
+    if (socket) {
+      socket.emit('send-message', {
+        text,
+        roomId: currentRoom
+      });
+    }
   };
 
   const handleTyping = () => {
+    const socket = getSocket();
+    if (!socket) return;
+
     socket.emit('typing', { roomId: currentRoom });
 
     // Clear existing timeout
@@ -160,6 +174,9 @@ function Chat({ user, connected, onLogout }) {
   };
 
   const handleJoinRoom = (roomId) => {
+    const socket = getSocket();
+    if (!socket) return;
+
     setCurrentRoom(roomId);
     setMessages([]);
     socket.emit('join-room', { roomId });
@@ -167,15 +184,21 @@ function Chat({ user, connected, onLogout }) {
   };
 
   const handleCreateRoom = (roomName) => {
-    socket.emit('create-room', { name: roomName });
+    const socket = getSocket();
+    if (socket) {
+      socket.emit('create-room', { name: roomName });
+    }
   };
 
   const handleReaction = (messageId, emoji) => {
-    socket.emit('add-reaction', {
-      messageId,
-      emoji,
-      roomId: currentRoom
-    });
+    const socket = getSocket();
+    if (socket) {
+      socket.emit('add-reaction', {
+        messageId,
+        emoji,
+        roomId: currentRoom
+      });
+    }
   };
 
   const playNotificationSound = () => {
